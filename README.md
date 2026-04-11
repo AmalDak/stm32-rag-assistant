@@ -17,7 +17,7 @@ based on natural language requirements, grounded in official ST documentation.
 
 1. Clone the repo
 2. Add your datasheets to `data/datasheets/`
-3. Set your Gemini API key in `docker-compose.yml`
+3. Create a .env file based on .env.example and add your API key
 4. Run:
 
 \```bash
