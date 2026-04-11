@@ -1,0 +1,21 @@
+# Environment
+venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Data — PDFs are too large for GitHub
+data/datasheets/
+
+# Docker volumes
+qdrant_data/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

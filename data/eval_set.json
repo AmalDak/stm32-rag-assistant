@@ -1,0 +1,34 @@
+[
+  {
+    "query": "I need a low power MCU with BLE for a wearable",
+    "expected_chip": "STM32WB55RG"
+  },
+  {
+    "query": "I need ultra low power for a coin battery sensor node",
+    "expected_chip": "STM32L073RZ"
+  },
+  {
+    "query": "I need high performance with Ethernet and lots of RAM",
+    "expected_chip": "STM32H743ZI"
+  },
+  {
+    "query": "cheap general purpose chip for a hobby project",
+    "expected_chip": "STM32F411CE"
+  },
+  {
+    "query": "MCU with BLE 5 and 802.15.4 support",
+    "expected_chip": "STM32WB55RG"
+  },
+  {
+    "query": "I need at least 1MB of flash and 480MHz clock",
+    "expected_chip": "STM32H743ZI"
+  },
+  {
+    "query": "stop mode current under 1 microamp",
+    "expected_chip": "STM32L073RZ"
+  },
+  {
+    "query": "MCU with USB and SPI for a mid range project",
+    "expected_chip": "STM32F411CE"
+  }
+]
