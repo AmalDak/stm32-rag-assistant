@@ -30,7 +30,7 @@ The system simulates a real pre-sales engineering workflow: a user describes wha
 
 ---
 
-## 🏗️ Hybrid RAG Pipeline
+## Hybrid RAG Pipeline
 
 ```mermaid
 flowchart LR
