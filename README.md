@@ -1,6 +1,6 @@
-# STM32 Pre-Sales Consultant — Domain-Specific RAG System
+# STM32 Pre-Sales Consultant | Domain-Specific RAG System
 
-An end-to-end domain-specific RAG system that takes natural language embedded system requirements and returns grounded, cited chip recommendations — combining deterministic symbolic filtering with neural retrieval.
+An end-to-end domain-specific RAG system that takes natural language embedded system requirements and returns grounded, cited chip recommendations, combining deterministic symbolic filtering with neural retrieval.
 
 > **"The LLM is not the main model. The system design is."**
 
@@ -24,53 +24,44 @@ An end-to-end domain-specific RAG system that takes natural language embedded sy
 
 ## Motivation
 
-Many introductory RAG examples focus on generic document collections. This project explores a domain-specific engineering use case where retrieval precision is critical — recommending STM32 microcontrollers based on official ST Microelectronics datasheets.
+Many introductory RAG examples focus on generic document collections. This project explores a domain-specific engineering use case where retrieval precision is critical, recommending STM32 microcontrollers based on official ST Microelectronics datasheets.
 
 The system simulates a real pre-sales engineering workflow: a user describes what they need in natural language, and the system reasons over technical documentation to return a specific chip recommendation with justification and citations.
 
 ---
 
-## Architecture
+## 🏗️ Hybrid RAG Pipeline
 
+```mermaid
+flowchart LR
+
+    U([User])
+
+    subgraph Symbolic["Symbolic Retrieval"]
+        A[Requirement Extraction]
+        B[Pandas Catalog Filter]
+    end
+
+    subgraph Neural["Neural Retrieval"]
+        C[Qdrant Vector Search]
+        D[Cross-Encoder Reranker]
+    end
+
+    subgraph Generation["Generation"]
+        E[Gemini 2.0 Flash]
+    end
+
+    U --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F([Cited STM32 Recommendation])
+
+    style Symbolic fill:#EEF7FF
+    style Neural fill:#FFFBEA
+    style Generation fill:#EEFFF3
 ```
-User Query
-    │
-    ▼
-┌─────────────────────┐
-│ Requirement         │  Keyword match → Gemini fallback
-│ Extractor           │  → { connectivity: [BLE], use_case: wireless-ble }
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ Catalog Filter      │  Deterministic Pandas filter    SYMBOLIC
-│ (symbolic layer)    │  → candidate chips + datasheets  LAYER
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ Vector Retriever    │  Qdrant search scoped to        NEURAL
-│ (neural layer)      │  candidate documents only        LAYER
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ Cross-Encoder       │  ms-marco-MiniLM — top-10 → top-5
-│ Reranker            │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ Gemini 2.0 Flash    │  Structured prompt + citations   GENERATION
-│ (generation layer)  │  Temperature 0.1                 LAYER
-└──────────┬──────────┘
-           │
-           ▼
-  Cited recommendation
-```
-
-![Architecture](assets/architecture.png)
-
 ---
 
 ## Example Pipeline Trace
@@ -125,7 +116,7 @@ Current evaluation uses exact-match chip identification. Planned improvements: R
 
 **Challenge: Naive vector retrieval is noisy on technical datasheets**
 STM32 datasheets repeat similar tables and spec blocks across sections. A raw similarity search returns many loosely-related chunks, confusing the LLM.
-**Solution**: restricted retrieval to candidate chip datasheets before performing semantic search — the catalog filter acts as a hard scope on the vector search space.
+**Solution**: restricted retrieval to candidate chip datasheets before performing semantic search, the catalog filter acts as a hard scope on the vector search space.
 
 **Challenge: Embedding similarity alone ranked generic sections above exact specs**
 Bi-encoders compare query and chunk independently. A query about "BLE stop current" would retrieve sections mentioning BLE generally rather than the specific power consumption table.
@@ -133,7 +124,7 @@ Bi-encoders compare query and chunk independently. A query about "BLE stop curre
 
 **Challenge: Requirement extraction should not always require an LLM**
 Calling Gemini for every query adds latency and burns API quota on simple cases like "I need BLE."
-**Solution**: implemented keyword-first extraction — BLE, Ethernet, low-power triggers are matched locally. Gemini is called only when keywords are insufficient.
+**Solution**: implemented keyword-first extraction BLE, Ethernet, low-power triggers are matched locally. Gemini is called only when keywords are insufficient.
 
 **Challenge: PDF datasheets contain tables that lose structure on extraction**
 PyMuPDF extracts table content as flat text, dropping column relationships.
@@ -191,7 +182,7 @@ docker compose exec backend python -m ingestion.run_ingestion
 ### Design Decisions
 
 **Chunking strategy for datasheets**
-Chunk size of 600 characters with 80-character overlap — large enough to preserve spec context, small enough to stay precise. Separator priority: `\n\n` → `\n` → `. ` → ` ` respects ST's document structure.
+Chunk size of 600 characters with 80-character overlap, large enough to preserve spec context, small enough to stay precise. Separator priority: `\n\n` → `\n` → `. ` → ` ` respects ST's document structure.
 
 **Temperature 0.1 for generation**
 Pre-sales recommendations must be consistent and factual. Low temperature prevents creative but incorrect spec values.
